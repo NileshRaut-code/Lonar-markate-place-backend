@@ -11,7 +11,12 @@ const orderScehma = new Schema({
     type: Number,
     default: 0,
   },
-  createdBy: {
+  ordercreatedBy: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  seller: {
     type: Schema.Types.ObjectId,
     ref: "User",
     required: true,

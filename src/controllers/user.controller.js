@@ -326,23 +326,6 @@ const allProducts = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, products, "All product Fected Succesfully"));
 });
 
-// const allProductsLimitpage = asyncHandler(async (req, res) => {
-//   const page = parseInt(req.query.page) || 1;
-//   const limit =  10; // Set a default limit if not provided
-
-//   const startIndex = (page - 1) * limit;
-//   const endIndex = page * limit;
-//   const products = await Product.find({}).populate({
-//     path: "createdBy",
-//     select: "fullName username",
-//   });
-
-//   console.log(products);
-//   return res
-//     .status(200)
-//     .json(new ApiResponse(200, products, "All product Fected Succesfully"));
-// });
-
 const allProductsLimitpage = asyncHandler(async (req, res) => {
   const page = parseInt(req.params.id);
   const limit = 10; // Set a default limit if not provided
