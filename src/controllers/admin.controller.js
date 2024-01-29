@@ -12,7 +12,7 @@ const allSellerData = asyncHandler(async (req, res) => {
     "-password -refreshToken"
   );
   if (Data == null) {
-    throw new ApiError(404, "No Seller are There");
+    throw new ApiError(404, "No Seller are  There");
   }
   return res.json(
     new ApiResponse(
