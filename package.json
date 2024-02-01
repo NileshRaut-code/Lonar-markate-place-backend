@@ -5,12 +5,11 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon -r dotenv/config --experimental-json-modules src/index.js"
+    "dev": "nodemon -r dotenv/config --experimental-json-modules src/index.js",
+    "start":"node src/index.js"
   },
   "keywords": [
-    "javascript",
-    "backend",
-    "chai"
+    "javascript"
   ],
   "author": "Nilesh Raut",
   "license": "ISC",
