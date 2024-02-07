@@ -4,6 +4,17 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ObjectId } from "mongodb";
+import { Review } from "../models/review.model.js";
+const allProducts = asyncHandler(async (req, res) => {
+  const product_data = await Product.find({}).populate({
+    path: "createdBy",
+    select: "fullName",
+  });
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, product_data, "all product fetched"));
+});
 
 const createProduct = asyncHandler(async (req, res) => {
   const createdBy = req.user._id;
@@ -146,6 +157,64 @@ const updateShopProfile = asyncHandler(async (req, res) => {
     );
 });
 
+const createComment = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+  const comment = req.body.comment;
+  const productdata = await Product.findOne({ _id: new ObjectId(id) });
+  if (!productdata) {
+    throw new ApiError(404, "No Product Found");
+  }
+
+  console.log(productdata);
+  const comment_data = await Review.create({
+    product_id: id,
+    review_comment: comment,
+    createdBy: req.user._id,
+  });
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { comment_data }, "reviews fetched"));
+});
+
+const getComment = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+  const productdata = await Product.findOne({ _id: new ObjectId(id) });
+  if (!productdata) {
+    throw new ApiError(404, "No Product Found");
+  }
+
+  console.log(productdata);
+  const comment_data = await Review.find({ product_id: new ObjectId(id) });
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { comment_data }, "reviews comment fetched"));
+});
+
+const editComment = asyncHandler(async (req, res) => {
+  const reviewId = req.params.reviewId;
+  const comment = req.body.comment;
+  await Review.findByIdAndUpdate(new ObjectId(reviewId), {
+    review_comment: comment,
+  });
+  const reviewdata = await Review.findById(new ObjectId(reviewId));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { reviewdata }, "reviews succesfull updated"));
+});
+
+const deleteComment = asyncHandler(async (req, res) => {
+  const reviewId = req.params.reviewId;
+  const reviewdata = await Review.findById(new ObjectId(reviewId));
+  if (!reviewdata) {
+    throw new ApiError(404, "review Not Found");
+  }
+
+  await Review.findByIdAndDelete(new ObjectId(reviewId));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "reviews succesfull deleted"));
+});
+
 export {
   createProduct,
   getShopProfile,
@@ -153,4 +222,9 @@ export {
   oneProduct,
   deleteProduct,
   updateShopProfile,
+  createComment,
+  allProducts,
+  getComment,
+  editComment,
+  deleteComment,
 };
