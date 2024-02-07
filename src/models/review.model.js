@@ -10,7 +10,7 @@ const reviewSchema = new Schema(
       type: String,
       require: true,
     },
-    like: {
+    rating: {
       type: Number,
       default: 0,
     },

@@ -5,6 +5,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ObjectId } from "mongodb";
 import { Review } from "../models/review.model.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 const allProducts = asyncHandler(async (req, res) => {
   const product_data = await Product.find({}).populate({
     path: "createdBy",
@@ -22,12 +23,28 @@ const createProduct = asyncHandler(async (req, res) => {
   if ([title, productdescription].some((field) => field?.trim() === "")) {
     throw new ApiError(400, "All fields are required");
   }
+
+  const productImageLocalPath = req.file?.path;
+
+  if (!productImageLocalPath) {
+    throw new ApiError(400, "product image file is missing");
+  }
+
+  //TODO: delete old image - assignment
+
+  const productImage = await uploadOnCloudinary(productImageLocalPath);
+
+  if (!productImage.url) {
+    throw new ApiError(400, "Error while uploading on Product image");
+  }
+
   const newProduct = await Product.create({
     title,
     productdescription,
     price,
     availableStock,
     createdBy,
+    image: productImage.url || "",
   });
 
   return res
@@ -50,7 +67,7 @@ const getShopProfile = asyncHandler(async (req, res) => {
     },
     {
       $lookup: {
-        from: "products", // The name of the collection you are looking up against
+        from: "products",
         localField: "_id",
         foreignField: "createdBy",
         as: "products",
@@ -58,8 +75,8 @@ const getShopProfile = asyncHandler(async (req, res) => {
     },
     {
       $project: {
-        password: 0, // exclude password field
-        refreshToken: 0, // exclude refreshToken field
+        password: 0,
+        refreshToken: 0,
       },
     },
   ]);
@@ -160,6 +177,11 @@ const updateShopProfile = asyncHandler(async (req, res) => {
 const createComment = asyncHandler(async (req, res) => {
   const id = req.params.id;
   const comment = req.body.comment;
+  const rating = req.body.rating;
+  console.log(req.body);
+  if (!id || !comment || !rating) {
+    throw new ApiError(200, "all feilds are require");
+  }
   const productdata = await Product.findOne({ _id: new ObjectId(id) });
   if (!productdata) {
     throw new ApiError(404, "No Product Found");
@@ -168,6 +190,7 @@ const createComment = asyncHandler(async (req, res) => {
   console.log(productdata);
   const comment_data = await Review.create({
     product_id: id,
+    rating: rating,
     review_comment: comment,
     createdBy: req.user._id,
   });
@@ -184,10 +207,12 @@ const getComment = asyncHandler(async (req, res) => {
   }
 
   console.log(productdata);
-  const comment_data = await Review.find({ product_id: new ObjectId(id) });
+  const reviewdata = await Review.find({
+    product_id: new ObjectId(id),
+  }).populate({ path: "createdBy", select: "fullName avatar" });
   return res
     .status(200)
-    .json(new ApiResponse(200, { comment_data }, "reviews comment fetched"));
+    .json(new ApiResponse(200, { reviewdata }, "reviews comment fetched"));
 });
 
 const editComment = asyncHandler(async (req, res) => {

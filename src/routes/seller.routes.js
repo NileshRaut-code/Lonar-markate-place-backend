@@ -16,6 +16,7 @@ import {
   editComment,
   deleteComment,
 } from "../controllers/seller.controller.js";
+import { upload } from "../middlewares/multer.middleware.js";
 import { verifyCreator } from "../middlewares/creator.middleware.js";
 import { verifyOwner } from "../middlewares/owner.middleware.js";
 import { verifyreviewCreator } from "../middlewares/reviewcreator.middleware.js";
@@ -32,7 +33,9 @@ router
   .route("/edit/product/:productId")
   .put(verifyJWT, verifyCreator, updateProduct);
 //verifySeller,
-router.route("/create-product").post(verifyJWT, verifySeller, createProduct);
+router
+  .route("/create-product")
+  .post(verifyJWT, verifySeller, upload.single("productImage"), createProduct);
 
 router
   .route("/shop/edit/:username")
@@ -45,5 +48,5 @@ router
   .route("/product/deletecomment/:reviewId")
   .delete(verifyJWT, verifyreviewCreator, deleteComment);
 
-router.route("/product/comment/:id").get(verifyJWT, getComment);
+router.route("/product/comment/:id").get(getComment);
 export default router;
