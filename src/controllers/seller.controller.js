@@ -24,25 +24,30 @@ const createProduct = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fields are required");
   }
 
-  const productImageLocalPath = req.file?.path;
+  // const productImageLocalPath = req.file?.path;
 
-  if (!productImageLocalPath) {
-    throw new ApiError(400, "product image file is missing");
-  }
+  // if (!productImageLocalPath) {
+  //   throw new ApiError(400, "product image file is missing");
+  // }
 
-  const productImage = await uploadOnCloudinary(productImageLocalPath);
+  // const productImage = await uploadOnCloudinary(productImageLocalPath);
 
   // if (!productImage.url) {
   //   throw new ApiError(400, "Error while uploading on Product image");
   // }
-
+  const productImageLocalPath = req.file?.path;
+  let productImage;
+  if (productImageLocalPath) {
+    productImage = await uploadOnCloudinary(productImageLocalPath);
+  }
   const newProduct = await Product.create({
     title,
     productdescription,
     price,
     availableStock,
     createdBy,
-    image: productImage.url || " ",
+    //image: productImage.url || " ",
+    image: productImage ? productImage.url : " ",
   });
 
   return res
