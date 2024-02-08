@@ -47,7 +47,7 @@ const createProduct = asyncHandler(async (req, res) => {
     availableStock,
     createdBy,
     //image: productImage.url || " ",
-    image: productImage ? productImage.url : " ",
+    image: productImage ? productImage.url : "",
   });
 
   return res
