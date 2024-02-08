@@ -30,13 +30,11 @@ const createProduct = asyncHandler(async (req, res) => {
     throw new ApiError(400, "product image file is missing");
   }
 
-  //TODO: delete old image - assignment
-
   const productImage = await uploadOnCloudinary(productImageLocalPath);
 
-  if (!productImage.url) {
-    throw new ApiError(400, "Error while uploading on Product image");
-  }
+  // if (!productImage.url) {
+  //   throw new ApiError(400, "Error while uploading on Product image");
+  // }
 
   const newProduct = await Product.create({
     title,
@@ -44,7 +42,7 @@ const createProduct = asyncHandler(async (req, res) => {
     price,
     availableStock,
     createdBy,
-    image: productImage.url || "",
+    image: productImage.url || " ",
   });
 
   return res
