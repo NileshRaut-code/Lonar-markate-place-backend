@@ -14,7 +14,7 @@
       { "src": "/(.*)", "dest": "src/index.js" }
       ,
     {
-      "src": "/(.+\\.[a-z]+)$",
+      "src": "/temp/(.+\\.[a-z]+)$",
       "dest": "/public/$1"
     }
     ]
