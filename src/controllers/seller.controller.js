@@ -23,24 +23,23 @@ const createProduct = asyncHandler(async (req, res) => {
   if ([title, productdescription].some((field) => field?.trim() === "")) {
     throw new ApiError(400, "All fields are required");
   }
-  console.log("ower data", req);
-  console.log("ower file", req?.file);
-  // const productImageLocalPath = req.file?.path;
 
-  // if (!productImageLocalPath) {
-  //   throw new ApiError(400, "product image file is missing");
-  // }
-
-  // const productImage = await uploadOnCloudinary(productImageLocalPath);
-
-  // if (!productImage.url) {
-  //   throw new ApiError(400, "Error while uploading on Product image");
-  // }
   const productImageLocalPath = req.file?.path;
-  let productImage;
-  if (productImageLocalPath) {
-    productImage = await uploadOnCloudinary(productImageLocalPath);
+
+  if (!productImageLocalPath) {
+    throw new ApiError(400, "product image file is missing");
   }
+
+  const productImage = await uploadOnCloudinary(productImageLocalPath);
+
+  if (!productImage.url) {
+    throw new ApiError(400, "Error while uploading on Product image");
+  }
+  // const productImageLocalPath = req.file?.path;
+  // let productImage;
+  // if (productImageLocalPath) {
+  //   productImage = await uploadOnCloudinary(productImageLocalPath);
+  // }
   const newProduct = await Product.create({
     title,
     productdescription,

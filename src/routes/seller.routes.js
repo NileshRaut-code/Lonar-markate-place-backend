@@ -33,8 +33,9 @@ router
   .route("/edit/product/:productId")
   .put(verifyJWT, verifyCreator, updateProduct);
 //verifySeller,
-//upload.single("productImage"),
-router.route("/create-product").post(verifyJWT, verifySeller, createProduct);
+router
+  .route("/create-product")
+  .post(verifyJWT, verifySeller, upload.single("productImage"), createProduct);
 
 router
   .route("/shop/edit/:username")
