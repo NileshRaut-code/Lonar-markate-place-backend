@@ -35,7 +35,7 @@ router
 //verifySeller,
 router
   .route("/create-product")
-  .post(verifyJWT, verifySeller, upload.single("productImage"), createProduct);
+  .post(verifyJWT, verifySeller, upload.any(), createProduct);
 
 router
   .route("/shop/edit/:username")

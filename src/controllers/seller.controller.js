@@ -5,7 +5,11 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ObjectId } from "mongodb";
 import { Review } from "../models/review.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import {
+  uploadImageToCloudinary,
+  uploadOnCloudinary,
+} from "../utils/cloudinary.js";
+import { v2 as cloudinary } from "cloudinary";
 const allProducts = asyncHandler(async (req, res) => {
   const product_data = await Product.find({}).populate({
     path: "createdBy",
@@ -35,11 +39,18 @@ const createProduct = asyncHandler(async (req, res) => {
   // if (!productImage.url) {
   //   throw new ApiError(400, "Error while uploading on Product image");
   // }
-  const productImageLocalPath = req.file?.path;
+  console.log(req.files[0]);
+  const productImageLocalPath = req?.files[0]?.buffer;
   let productImage;
   if (productImageLocalPath) {
-    productImage = await uploadOnCloudinary(productImageLocalPath);
+    //i changed it only for vercel becoz cant stored into local
+    // productImage = await uploadOnCloudinary(productImageLocalPath);
+    productImage = await uploadImageToCloudinary(productImageLocalPath);
+    if (!productImage.url) {
+      throw new ApiError(400, "Error while uploading on Product image");
+    }
   }
+  console.log(productImage?.url);
   const newProduct = await Product.create({
     title,
     productdescription,
