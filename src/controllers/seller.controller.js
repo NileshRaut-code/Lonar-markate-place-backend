@@ -42,13 +42,15 @@ const createProduct = asyncHandler(async (req, res) => {
   console.log(req.files[0]);
   const productImageLocalPath = req?.files[0]?.buffer;
   let productImage;
-  if (productImageLocalPath) {
+
+  if (!productImageLocalPath) {
     //i changed it only for vercel becoz cant stored into local
     // productImage = await uploadOnCloudinary(productImageLocalPath);
-    productImage = await uploadImageToCloudinary(productImageLocalPath);
-    if (!productImage.url) {
-      throw new ApiError(400, "Error while uploading on Product image");
-    }
+    throw new ApiError(400, "product image file is missing");
+  }
+  productImage = await uploadImageToCloudinary(productImageLocalPath);
+  if (!productImage.url) {
+    throw new ApiError(400, "Error while uploading on Product image");
   }
   console.log(productImage?.url);
   const newProduct = await Product.create({

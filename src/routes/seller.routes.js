@@ -16,11 +16,13 @@ import {
   editComment,
   deleteComment,
 } from "../controllers/seller.controller.js";
-import { upload } from "../middlewares/multer.middleware.js";
 import { verifyCreator } from "../middlewares/creator.middleware.js";
 import { verifyOwner } from "../middlewares/owner.middleware.js";
 import { verifyreviewCreator } from "../middlewares/reviewcreator.middleware.js";
+import multer from "multer";
 const router = Router();
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 router.route("/allproduct").get(allProducts);
 router.route("/shop/:username").get(getShopProfile);
@@ -35,7 +37,7 @@ router
 //verifySeller,
 router
   .route("/create-product")
-  .post(verifyJWT, verifySeller, upload.any(), createProduct);
+  .post(verifyJWT, verifySeller, upload.any("image", 1), createProduct);
 
 router
   .route("/shop/edit/:username")
