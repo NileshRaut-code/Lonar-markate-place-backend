@@ -23,6 +23,11 @@ const createProduct = asyncHandler(async (req, res) => {
   if ([title, productdescription].some((field) => field?.trim() === "")) {
     throw new ApiError(400, "All fields are required");
   }
+  console.log(res.file);
+
+  if (req.file) {
+    throw new ApiError("Not Exist");
+  }
 
   // const productImageLocalPath = req.file?.path;
 
