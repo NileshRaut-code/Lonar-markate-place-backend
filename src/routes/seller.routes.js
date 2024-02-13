@@ -21,8 +21,7 @@ import { verifyOwner } from "../middlewares/owner.middleware.js";
 import { verifyreviewCreator } from "../middlewares/reviewcreator.middleware.js";
 import multer from "multer";
 const router = Router();
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = multer();
 
 router.route("/allproduct").get(allProducts);
 router.route("/shop/:username").get(getShopProfile);
