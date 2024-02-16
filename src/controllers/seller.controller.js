@@ -138,7 +138,12 @@ const updateProduct = asyncHandler(async (req, res) => {
 const oneProduct = asyncHandler(async (req, res) => {
   const product_id = req.params.id;
 
-  const product_data = await Product.findOne({ _id: new ObjectId(product_id) });
+  const product_data = await Product.findOne({
+    _id: new ObjectId(product_id),
+  }).populate({
+    path: "createdBy",
+    select: "_id",
+  });
   if (!product_data) {
     throw new ApiError(404, "Product Does not Exist");
   }
