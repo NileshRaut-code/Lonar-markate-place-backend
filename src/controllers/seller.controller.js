@@ -109,20 +109,35 @@ const getShopProfile = asyncHandler(async (req, res) => {
 const updateProduct = asyncHandler(async (req, res) => {
   const product_id = req.params.productId;
   const { title, productdescription, price, Avaiblestock } = req.body;
-  //   console.log(title, productdescription, price, Avaiblestock);
+  const updatingfields = {};
+  if (title) {
+    updatingfields.title = title;
+  }
+  if (productdescription) {
+    updatingfields.productdescription = productdescription;
+  }
 
-  //console.log(await Product.findOne({ _id: new ObjectId(productId) }));
+  if (price) {
+    updatingfields.price = price;
+  }
+  if (Avaiblestock) {
+    updatingfields.Avaiblestock = Avaiblestock;
+  }
+
+  if (req?.files[0]?.buffer) {
+    const imageurl = await uploadImageToCloudinary(req?.files[0]?.buffer);
+    if (!imageurl) {
+      throw new ApiError(404, "Image is not Uploaded Properly");
+    }
+    updatingfields.image = imageurl.url;
+  }
+
   const updatedProduct = await Product.findByIdAndUpdate(
     {
       _id: new ObjectId(product_id),
     },
     {
-      $set: {
-        title,
-        productdescription,
-        price,
-        Avaiblestock,
-      },
+      $set: updatingfields,
     },
     { new: true }
   ).select();

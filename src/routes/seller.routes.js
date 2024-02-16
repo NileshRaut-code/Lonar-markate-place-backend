@@ -32,7 +32,7 @@ router
   .delete(verifyJWT, verifySeller, deleteProduct);
 router
   .route("/edit/product/:productId")
-  .put(verifyJWT, verifyCreator, updateProduct);
+  .put(verifyJWT, verifyCreator, upload.any("image", 1), updateProduct);
 //verifySeller,
 router
   .route("/create-product")
