@@ -6,7 +6,7 @@ import { viewOrder, viewallOrder } from "../controllers/order.controller.js";
 const router = Router();
 
 router.route("/admin").get(verifyJWT, verifyAdmin, allOrder);
-router.route("/create-order/:productId").post(verifyJWT, createOrder);
+router.route("/create-order").post(verifyJWT, createOrder);
 router.route("/view-order/:orderId").get(verifyJWT, viewOrder);
 router.route("/view-order").get(verifyJWT, viewallOrder);
 

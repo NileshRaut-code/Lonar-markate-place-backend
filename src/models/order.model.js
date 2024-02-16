@@ -4,8 +4,10 @@ const orderScehma = new Schema(
   {
     product_list: [
       {
-        type: Schema.Types.ObjectId,
-        ref: "Product",
+        _id: { type: Schema.Types.ObjectId, ref: "Product" },
+        quantity: Number,
+        price: Number,
+        title: String,
       },
     ],
     total_cost: {
@@ -17,10 +19,15 @@ const orderScehma = new Schema(
       ref: "User",
       required: true,
     },
-    seller: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+    status: {
+      type: String,
+      enum: [
+        "ORDERED BUT PENDING TO DISPATCH",
+        "CANCLED",
+        "DISPATCH",
+        "DELIVERED",
+      ],
+      default: "ORDERED BUT PENDING TO DISPATCH",
     },
   },
   {

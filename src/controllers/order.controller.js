@@ -13,19 +13,25 @@ const allOrder = asyncHandler(async (req, res) => {
 });
 
 const createOrder = asyncHandler(async (req, res) => {
-  const { productId } = req.params;
-  console.log(productId);
-  const currentuserid = req.user._id;
-  const productdata = await Product.findOne({
-    _id: new ObjectId(productId),
-  });
-  const pId = productdata._id;
-  const sellerId = productdata.createdBy;
-  console.log(sellerId);
+  const { products } = req.body;
+  const ordercreatedBy = req.user._id;
+
+  console.log(products);
+  // const productdata = await Product.findOne({
+  //   _id: new ObjectId(productId),
+  // });
+  console.log(products);
+  const total_cost = products.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
+  );
+
+  console.log(total_cost);
+
   const createddata = await Order.create({
-    product_list: pId,
-    ordercreatedBy: currentuserid,
-    seller: sellerId,
+    product_list: products,
+    ordercreatedBy: ordercreatedBy,
+    total_cost: total_cost,
   });
   res.json(new ApiResponse(200, createddata, "succesfully created"));
 });
@@ -37,7 +43,12 @@ const viewOrder = asyncHandler(async (req, res) => {
   const orderdata = await Order.find({
     _id: new ObjectId(orderId),
     ordercreatedBy: new ObjectId(currentuserid),
-  }).select();
+  })
+    .populate({
+      path: "product_list._id", // Populate the product field inside the product_list array
+      select: "image title",
+    })
+    .select();
   console.log(orderdata);
   if (orderdata.length == 0) {
     throw new ApiError(404, "Order Not found");
