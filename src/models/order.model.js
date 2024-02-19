@@ -29,7 +29,7 @@ const orderScehma = new Schema(
     },
     payment_mode: {
       type: String,
-      enum: ["COD", "CREADITCARD", "EMI"],
+      enum: ["COD", "CREDITCARD", "EMI"],
       required: true,
     },
     status: {
