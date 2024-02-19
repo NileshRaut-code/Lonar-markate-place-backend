@@ -1,6 +1,6 @@
 import { Router } from "express";
 import {
-  confirmOrder,
+  EditOrder,
   getComment,
   getShopProfile,
 } from "../controllers/seller.controller.js";
@@ -53,7 +53,7 @@ router
 
 router.route("/product/comment/:id").get(getComment);
 
-router.route("/order/confirm").put(verifyJWT, verifySeller, confirmOrder);
+router.route("/order/confirm").put(verifyJWT, verifySeller, EditOrder);
 router.route("/allorder").get(verifyJWT, verifySeller, allOrder);
 
 export default router;

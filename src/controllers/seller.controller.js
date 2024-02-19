@@ -285,7 +285,22 @@ const allOrder = asyncHandler(async (req, res) => {
   });
   res.send(allorderdata);
 });
-const confirmOrder = asyncHandler(async (req, res) => {});
+const EditOrder = asyncHandler(async (req, res) => {
+  const { _id, status } = req.body;
+
+  const updatedOrder = await Order.findById(new ObjectId(_id));
+  if (!updatedOrder) {
+    throw new ApiError(404, "Order not Exist");
+  }
+  await Order.findByIdAndUpdate(new ObjectId(_id), {
+    $set: { status },
+  });
+
+  const updateddata = await Order.findById(new ObjectId(_id));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updateddata, "order succesfull updated"));
+});
 
 export {
   createProduct,
@@ -299,6 +314,6 @@ export {
   getComment,
   editComment,
   deleteComment,
-  confirmOrder,
+  EditOrder,
   allOrder,
 };
