@@ -15,28 +15,26 @@ const allOrder = asyncHandler(async (req, res) => {
 const createOrder = asyncHandler(async (req, res) => {
   const { products, address, pincode, payment_mode } = req.body;
   const ordercreatedBy = req.user._id;
+  const createdOrders = [];
 
-  console.log(products);
-  // const productdata = await Product.findOne({
-  //   _id: new ObjectId(productId),
-  // });
-  console.log(products);
-  const total_cost = products.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  );
+  for (const product of products) {
+    const { product_id, quantity, price } = product;
+    console.log(product_id);
+    // Create the order for each product
+    const createdOrder = await Order.create({
+      product_id,
+      address,
+      pincode,
+      payment_mode,
+      quantity,
+      price,
+      ordercreatedBy,
+    });
 
-  console.log(total_cost);
-
-  const createddata = await Order.create({
-    product_list: products,
-    address,
-    pincode,
-    payment_mode,
-    ordercreatedBy: ordercreatedBy,
-    total_cost: total_cost,
-  });
-  res.json(new ApiResponse(200, createddata, "succesfully created"));
+    // Push the created order to the array of createdOrders
+    createdOrders.push(createdOrder);
+  }
+  res.json(new ApiResponse(200, createdOrders, "succesfully created"));
 });
 
 const viewOrder = asyncHandler(async (req, res) => {
@@ -48,7 +46,7 @@ const viewOrder = asyncHandler(async (req, res) => {
     ordercreatedBy: new ObjectId(currentuserid),
   })
     .populate({
-      path: "product_list._id", // Populate the product field inside the product_list array
+      path: "product_id", // Populate the product field inside the product_list array
       select: "image title",
     })
     .select();
@@ -72,4 +70,5 @@ const viewallOrder = asyncHandler(async (req, res) => {
     new ApiResponse(200, orderdata, "succesfully fetched All Logged Uesr order")
   );
 });
+
 export { allOrder, createOrder, viewOrder, viewallOrder };

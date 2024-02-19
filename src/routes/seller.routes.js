@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  confirmOrder,
   getComment,
   getShopProfile,
 } from "../controllers/seller.controller.js";
@@ -15,6 +16,7 @@ import {
   allProducts,
   editComment,
   deleteComment,
+  allOrder,
 } from "../controllers/seller.controller.js";
 import { verifyCreator } from "../middlewares/creator.middleware.js";
 import { verifyOwner } from "../middlewares/owner.middleware.js";
@@ -50,4 +52,8 @@ router
   .delete(verifyJWT, verifyreviewCreator, deleteComment);
 
 router.route("/product/comment/:id").get(getComment);
+
+router.route("/order/confirm").put(verifyJWT, verifySeller, confirmOrder);
+router.route("/allorder").get(verifyJWT, verifySeller, allOrder);
+
 export default router;

@@ -10,6 +10,7 @@ import {
   uploadOnCloudinary,
 } from "../utils/cloudinary.js";
 import { v2 as cloudinary } from "cloudinary";
+import { Order } from "../models/order.model.js";
 const allProducts = asyncHandler(async (req, res) => {
   const product_data = await Product.find({}).populate({
     path: "createdBy",
@@ -276,6 +277,16 @@ const deleteComment = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "reviews succesfull deleted"));
 });
 
+const allOrder = asyncHandler(async (req, res) => {
+  const allorderdata = await Order.find({}).populate({
+    path: "product_id",
+    select: "createdBy",
+    match: { createdBy: req.user._id },
+  });
+  res.send(allorderdata);
+});
+const confirmOrder = asyncHandler(async (req, res) => {});
+
 export {
   createProduct,
   getShopProfile,
@@ -288,4 +299,6 @@ export {
   getComment,
   editComment,
   deleteComment,
+  confirmOrder,
+  allOrder,
 };
