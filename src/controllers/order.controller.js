@@ -13,7 +13,7 @@ const allOrder = asyncHandler(async (req, res) => {
 });
 
 const createOrder = asyncHandler(async (req, res) => {
-  const { products } = req.body;
+  const { products, address, pincode, payment_mode } = req.body;
   const ordercreatedBy = req.user._id;
 
   console.log(products);
@@ -30,6 +30,9 @@ const createOrder = asyncHandler(async (req, res) => {
 
   const createddata = await Order.create({
     product_list: products,
+    address,
+    pincode,
+    payment_mode,
     ordercreatedBy: ordercreatedBy,
     total_cost: total_cost,
   });

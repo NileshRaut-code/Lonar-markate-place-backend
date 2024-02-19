@@ -19,6 +19,19 @@ const orderScehma = new Schema(
       ref: "User",
       required: true,
     },
+    address: {
+      type: String,
+      required: true,
+    },
+    pincode: {
+      type: Number,
+      required: true,
+    },
+    payment_mode: {
+      type: String,
+      enum: ["COD", "CREADITCARD", "EMI"],
+      required: true,
+    },
     status: {
       type: String,
       enum: [
