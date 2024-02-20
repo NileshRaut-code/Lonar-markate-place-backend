@@ -7,7 +7,7 @@ import { ObjectId } from "mongodb";
 import { ApiError } from "../utils/ApiError.js";
 
 const allOrder = asyncHandler(async (req, res) => {
-  const allorderData = await Order.find({}).populate("product_list");
+  const allorderData = await Order.find({}).populate("product_id");
 
   res.json(new ApiResponse(200, allorderData, "All data Fecthed"));
 });
