@@ -61,7 +61,12 @@ const viewallOrder = asyncHandler(async (req, res) => {
   console.log(currentuserid);
   const orderdata = await Order.find({
     ordercreatedBy: new ObjectId(currentuserid),
-  }).select();
+  })
+    .populate({
+      path: "product_id", // Populate the product field inside the product_list array
+      select: "image title",
+    })
+    .select();
   console.log(orderdata);
   if (orderdata.length == 0) {
     throw new ApiError(404, "Order Not found");
