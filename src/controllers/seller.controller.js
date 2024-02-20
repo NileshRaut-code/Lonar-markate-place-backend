@@ -280,7 +280,7 @@ const deleteComment = asyncHandler(async (req, res) => {
 const allOrder = asyncHandler(async (req, res) => {
   const allorderdata = await Order.find({}).populate({
     path: "product_id",
-    select: "createdBy",
+    select: "createdBy title image",
     match: { createdBy: req.user._id },
   });
   res.send(allorderdata);
