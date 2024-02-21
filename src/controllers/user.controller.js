@@ -272,23 +272,24 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
-  const { fullName, email } = req.body;
-
-  if (!fullName || !email) {
-    throw new ApiError(400, "All fields are required");
+  const { fullName } = req.body;
+  console.log(req.body);
+  if (JSON.stringify(req.body) === "{}") {
+    throw new ApiError(
+      400,
+      "Email | FullName | phoneno Required to Update Profile "
+    );
   }
+  console.log(req.body);
 
   const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
-      $set: {
-        fullName,
-        email: email,
-      },
+      $set: req.body,
     },
     { new: true }
   ).select("-password");
-
+  console.log(await User.findByIdAndUpdate(req.user?._id));
   return res
     .status(200)
     .json(new ApiResponse(200, user, "Account details updated successfully"));
