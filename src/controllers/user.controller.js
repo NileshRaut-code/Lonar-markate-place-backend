@@ -6,6 +6,8 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import { Product } from "../models/product.model.js";
+import { uploadImageToCloudinary } from "../utils/cloudinary.js";
+
 const generateAccessAndRefereshTokens = async (userId) => {
   try {
     const user = await User.findById(userId);
@@ -288,7 +290,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
       $set: req.body,
     },
     { new: true }
-  ).select("-password");
+  ).select("-password -refreshToken");
   console.log(await User.findByIdAndUpdate(req.user?._id));
   return res
     .status(200)
@@ -296,29 +298,25 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 });
 
 const updateUserAvatar = asyncHandler(async (req, res) => {
-  const avatarLocalPath = req.file?.path;
+  const productImageLocalPath = req?.files[0]?.buffer;
 
-  if (!avatarLocalPath) {
-    throw new ApiError(400, "Avatar file is missing");
+  if (!productImageLocalPath) {
+    throw new ApiError(400, "product image file is missing");
   }
-
-  //TODO: delete old image - assignment
-
-  const avatar = await uploadOnCloudinary(avatarLocalPath);
-
-  if (!avatar.url) {
-    throw new ApiError(400, "Error while uploading on avatar");
+  const productImage = await uploadImageToCloudinary(productImageLocalPath);
+  if (!productImage.url) {
+    throw new ApiError(400, "Error while uploading on Product image");
   }
 
   const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
       $set: {
-        avatar: avatar.url,
+        avatar: productImage.url,
       },
     },
     { new: true }
-  ).select("-password");
+  ).select("-password -refreshToken");
 
   return res
     .status(200)
@@ -348,7 +346,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
       },
     },
     { new: true }
-  ).select("-password");
+  ).select("-password -refreshToken");
 
   return res
     .status(200)
