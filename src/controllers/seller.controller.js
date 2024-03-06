@@ -276,13 +276,53 @@ const deleteComment = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, "reviews succesfull deleted"));
 });
+// match: { createdBy: req.user._id },
 
 const allOrder = asyncHandler(async (req, res) => {
-  const allorderdata = await Order.find({}).populate({
-    path: "product_id",
-    select: "createdBy title image",
-    match: { createdBy: req.user._id },
-  });
+  const userId = req.user._id;
+
+  const allorderdata = await Order.aggregate([
+    {
+      $lookup: {
+        from: "products", // The collection to join with `Order`. Ensure this is the correct name of your products collection
+        localField: "product_id", // The field from the orders collection
+        foreignField: "_id", // The field from the products collection to match on
+        as: "productDetails", // The array field name where the joined documents will be placed
+      },
+    },
+    {
+      $unwind: "$productDetails", // Deconstructs the `productDetails` array
+    },
+    {
+      $match: {
+        "productDetails.createdBy": userId, // Filter where `createdBy` matches the current user's ID
+      },
+    },
+    {
+      $project: {
+        product_id: 1,
+        quantity: 1,
+        price: 1,
+        ordercreatedBy: 1,
+        address: 1,
+        pincode: 1,
+        payment_mode: 1,
+        status: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        total_cost: 1,
+        productDetails: {
+          createdBy: 1,
+          title: 1,
+          image: 1,
+        },
+      },
+    },
+  ]);
+  // const allorderdata = await Order.find({}).populate({
+  //   path: "product_id",
+  //   select: "createdBy title image",
+  // });
   res.send(allorderdata);
 });
 const EditOrder = asyncHandler(async (req, res) => {
