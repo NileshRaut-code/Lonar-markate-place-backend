@@ -1,21 +1,47 @@
 import { Schema, mongoose } from "mongoose";
 
-const orderScehma = new Schema({
-  product_list: [
-    {
+const orderSchema = new Schema(
+  {
+    product_id: { type: Schema.Types.ObjectId, ref: "Product", require: true },
+    quantity: { type: Number, required: true },
+    price: { type: Number, required: true },
+    total_cost: { type: Number },
+    ordercreatedBy: {
       type: Schema.Types.ObjectId,
-      ref: "Product",
+      ref: "User",
+      required: true,
     },
-  ],
-  total_cost: {
-    type: Number,
-    default: 0,
+    address: {
+      type: String,
+      required: true,
+    },
+    pincode: {
+      type: Number,
+      required: true,
+    },
+    payment_mode: {
+      type: String,
+      enum: ["COD", "CREDITCARD", "EMI"],
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: [
+        "ORDERED BUT PENDING TO DISPATCH",
+        "CANCLED",
+        "DISPATCH",
+        "DELIVERED",
+      ],
+      default: "ORDERED BUT PENDING TO DISPATCH",
+    },
   },
-  createdBy: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
+  {
+    timestamps: true,
+  }
+);
+orderSchema.pre("save", function (next) {
+  // Calculate the total cost based on price and quantity
+  this.total_cost = this.price * this.quantity;
+  next();
 });
-
-export const Order = mongoose.model("Order", orderScehma);
+export const Order = mongoose.model("Order", orderSchema);
