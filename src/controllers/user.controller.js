@@ -6,6 +6,8 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import { Product } from "../models/product.model.js";
+import { uploadImageToCloudinary } from "../utils/cloudinary.js";
+
 const generateAccessAndRefereshTokens = async (userId) => {
   try {
     const user = await User.findById(userId);
@@ -70,9 +72,46 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Something went wrong while registering the user");
   }
 
+  const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(
+    createdUser._id
+  );
+
+  const loggedInUser = await User.findById(createdUser._id).select(
+    "-password -refreshToken"
+  );
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  };
+
   return res
-    .status(201)
-    .json(new ApiResponse(200, createdUser, "User registered Successfully"));
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(
+        200,
+        {
+          user: loggedInUser,
+          accessToken,
+          refreshToken,
+        },
+        "User logged In Successfully"
+      )
+    );
+  // const options = {
+  //   httpOnly: true,
+  //   secure: true,
+  //   sameSite: "none",
+  // };
+
+  // return res
+  //   .status(201)
+  //   .cookie("accessToken", accessToken, options)
+  //   .cookie("refreshToken", refreshToken, options)
+  //   .json(new ApiResponse(200, createdUser, "User registered Successfully"));
 });
 
 const loginUser = asyncHandler(async (req, res) => {
@@ -112,7 +151,7 @@ const loginUser = asyncHandler(async (req, res) => {
     "-password -refreshToken"
   );
 
-   const options = {
+  const options = {
     httpOnly: true,
     secure: true,
     sameSite: "none",
@@ -148,7 +187,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     }
   );
 
-    const options = {
+  const options = {
     httpOnly: true,
     secure: true,
     sameSite: "none",
@@ -188,6 +227,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     const options = {
       httpOnly: true,
       secure: true,
+      sameSite: "none",
     };
 
     const { accessToken, newRefreshToken } =
@@ -234,52 +274,49 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
-  const { fullName, email } = req.body;
-
-  if (!fullName || !email) {
-    throw new ApiError(400, "All fields are required");
+  const { fullName } = req.body;
+  console.log(req.body);
+  if (JSON.stringify(req.body) === "{}") {
+    throw new ApiError(
+      400,
+      "Email | FullName | phoneno Required to Update Profile "
+    );
   }
+  console.log(req.body);
 
   const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
-      $set: {
-        fullName,
-        email: email,
-      },
+      $set: req.body,
     },
     { new: true }
-  ).select("-password");
-
+  ).select("-password -refreshToken");
+  console.log(await User.findByIdAndUpdate(req.user?._id));
   return res
     .status(200)
     .json(new ApiResponse(200, user, "Account details updated successfully"));
 });
 
 const updateUserAvatar = asyncHandler(async (req, res) => {
-  const avatarLocalPath = req.file?.path;
+  const productImageLocalPath = req?.files[0]?.buffer;
 
-  if (!avatarLocalPath) {
-    throw new ApiError(400, "Avatar file is missing");
+  if (!productImageLocalPath) {
+    throw new ApiError(400, "product image file is missing");
   }
-
-  //TODO: delete old image - assignment
-
-  const avatar = await uploadOnCloudinary(avatarLocalPath);
-
-  if (!avatar.url) {
-    throw new ApiError(400, "Error while uploading on avatar");
+  const productImage = await uploadImageToCloudinary(productImageLocalPath);
+  if (!productImage.url) {
+    throw new ApiError(400, "Error while uploading on Product image");
   }
 
   const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
       $set: {
-        avatar: avatar.url,
+        avatar: productImage.url,
       },
     },
     { new: true }
-  ).select("-password");
+  ).select("-password -refreshToken");
 
   return res
     .status(200)
@@ -309,7 +346,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
       },
     },
     { new: true }
-  ).select("-password");
+  ).select("-password -refreshToken");
 
   return res
     .status(200)
@@ -327,23 +364,6 @@ const allProducts = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, products, "All product Fected Succesfully"));
 });
-
-// const allProductsLimitpage = asyncHandler(async (req, res) => {
-//   const page = parseInt(req.query.page) || 1;
-//   const limit =  10; // Set a default limit if not provided
-
-//   const startIndex = (page - 1) * limit;
-//   const endIndex = page * limit;
-//   const products = await Product.find({}).populate({
-//     path: "createdBy",
-//     select: "fullName username",
-//   });
-
-//   console.log(products);
-//   return res
-//     .status(200)
-//     .json(new ApiResponse(200, products, "All product Fected Succesfully"));
-// });
 
 const allProductsLimitpage = asyncHandler(async (req, res) => {
   const page = parseInt(req.params.id);
