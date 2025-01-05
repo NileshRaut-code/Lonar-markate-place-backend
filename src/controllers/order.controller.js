@@ -14,18 +14,29 @@ const allOrder = asyncHandler(async (req, res) => {
 
 
 const verifyOrderPayment = asyncHandler(async (req, res) => {
-  // const allorderData = await Order.find({}).populate("product_id");
-  const order=await Order.find({_id: new ObjectId(req.body.orderId)})
+  // Convert orderId to ObjectId if it's not already
+  const orderId = new ObjectId(req.body.orderId);
+
+  // Generate a payment ID
   const payment_id = `PAY_${Date.now()}_${req.body.orderId}`;
+
+  // Use findOneAndUpdate to find the order and update it in one operation
+  const order = await Order.findOneAndUpdate(
+    { _id: orderId }, // Query condition
+    { 
+      payment_status: "SUCCESS", 
+      payment_id: payment_id 
+    }, // Update fields
+    { new: true } // Return the updated document
+  );
+
+  // If no order found, return an error
   if (!order) {
-    
     throw new ApiError(404, "Order Not found");
   }
-  order.payment_status = "SUCCESS";
-  order.payment_id = payment_id;
-  await order.save();
 
-  res.json(new ApiResponse(200, order, "The Payment Succes"));
+  // Send success response with the updated order
+  res.json(new ApiResponse(200, order, "The Payment Success"));
 });
 
 const createOrder = asyncHandler(async (req, res) => {
