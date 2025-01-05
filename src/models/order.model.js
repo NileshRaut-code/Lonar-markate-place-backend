@@ -31,8 +31,7 @@ const orderSchema = new Schema(
     },
     payment_id:{
       type: String,
-      enum: ["PENDING", "SUCCESS", "COD"],
-      required: true,
+
     },
     status: {
       type: String,
