@@ -12,6 +12,22 @@ const allOrder = asyncHandler(async (req, res) => {
   res.json(new ApiResponse(200, allorderData, "All data Fecthed"));
 });
 
+
+const verifyOrderPayment = asyncHandler(async (req, res) => {
+  // const allorderData = await Order.find({}).populate("product_id");
+  const order=await Order.find({_id: new ObjectId(req.body.orderId)})
+  const payment_id = `PAY_${Date.now()}_${req.body.orderId}`;
+  if (!order) {
+    
+    throw new ApiError(404, "Order Not found");
+  }
+  order.payment_status = "SUCCESS";
+  order.payment_id = payment_id;
+  await order.save();
+
+  res.json(new ApiResponse(200, order, "The Payment Succes"));
+});
+
 const createOrder = asyncHandler(async (req, res) => {
   const { products, address, pincode, payment_mode } = req.body;
   const ordercreatedBy = req.user._id;
@@ -29,6 +45,8 @@ const createOrder = asyncHandler(async (req, res) => {
       quantity,
       price,
       ordercreatedBy,
+      payment_status: payment_mode === "COD" ? "COD" : "PENDING",
+
     });
 
     // Push the created order to the array of createdOrders
@@ -76,4 +94,4 @@ const viewallOrder = asyncHandler(async (req, res) => {
   );
 });
 
-export { allOrder, createOrder, viewOrder, viewallOrder };
+export { allOrder, createOrder, viewOrder, viewallOrder,verifyOrderPayment };

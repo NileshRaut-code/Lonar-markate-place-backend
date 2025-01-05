@@ -24,6 +24,16 @@ const orderSchema = new Schema(
       enum: ["COD", "CREDITCARD", "EMI"],
       required: true,
     },
+    payment_status:{
+      type: String,
+      enum: ["PENDING", "SUCCESS", "COD"],
+      required: true,
+    },
+    payment_id:{
+      type: String,
+      enum: ["PENDING", "SUCCESS", "COD"],
+      required: true,
+    },
     status: {
       type: String,
       enum: [
