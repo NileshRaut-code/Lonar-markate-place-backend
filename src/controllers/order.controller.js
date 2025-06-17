@@ -11,7 +11,6 @@ const razorpay = new Razorpay({
     key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-// For Admin: Get all orders in the system
 const allOrder = asyncHandler(async (req, res) => {
   const allorderData = await Order.find({}).populate("product_id");
   res.json(new ApiResponse(200, allorderData, "All order data fetched"));
@@ -118,7 +117,6 @@ const verifyOnlinePayment = asyncHandler(async (req, res) => {
     res.json(new ApiResponse(200, { verified: true, orders: createdOrders }, "Payment verified and order created successfully"));
 });
 
-// For User: View all their own orders
 const viewallOrder = asyncHandler(async (req, res) => {
   const currentuserid = req.user._id;
   const orderdata = await Order.find({ ordercreatedBy: new ObjectId(currentuserid) })
@@ -130,7 +128,6 @@ const viewallOrder = asyncHandler(async (req, res) => {
   res.json(new ApiResponse(200, orderdata, "Successfully fetched all orders for user"));
 });
 
-// For User: View a single specific order
 const viewOrder = asyncHandler(async (req, res) => {
   const { orderId } = req.params;
   const currentuserid = req.user._id;
