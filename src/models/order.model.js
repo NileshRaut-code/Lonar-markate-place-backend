@@ -33,6 +33,9 @@ const orderSchema = new Schema(
       type: String,
 
     },
+    razorpay_order_id:{
+      type: String,
+    },
     status: {
       type: String,
       enum: [
