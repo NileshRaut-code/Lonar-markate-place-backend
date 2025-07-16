@@ -3,12 +3,12 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import { Product } from "../models/product.model.js";
 import { uploadImageToCloudinary } from "../utils/cloudinary.js";
-
+import sendEmail from "../utils/Email.js"
+import crypto from "crypto";
 const generateAccessAndRefereshTokens = async (userId) => {
   try {
     const user = await User.findById(userId);
@@ -409,7 +409,8 @@ const forgotPassword = asyncHandler(async (req, res) => {
     }
     const resetToken=user.generatePasswordResetToken(); 
     await user.save();  
-    const ResetUrl='https://'+req.get('host')+'/reset-password/'+resetToken;
+
+    const ResetUrl='http://'+req.get('origin')+'/reset-password/'+resetToken;
     
     const message=`Please click on the link to reset your password: ${ResetUrl}`;
     await sendEmail({
@@ -423,32 +424,22 @@ const forgotPassword = asyncHandler(async (req, res) => {
 })
 
 const resetPassword = asyncHandler(async (req, res) => {
-  const { resetToken } = req.params;
-  const { password } = req.body;
+    const { resetToken, password } = req.body;
+    console.log(resetToken,password);
 
-  const hashedToken = crypto
-    .createHash("sha256")
-    .update(resetToken)
-    .digest("hex");
-
-  const user = await User.findOne({
-    resetToken: hashedToken,
-    resetTokenExpiry: { $gt: Date.now() },
-  });
-
-  if (!user) {
-    throw new ApiError(400, "Invalid or expired password reset token");
-  }
-
-  user.password = password;
-  user.resetToken = undefined;
-  user.resetTokenExpiry = undefined;
-  await user.save();
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, {}, "Password has been reset successfully."));
-});
+    const hashedToken=crypto.createHash("sha256").update(resetToken).digest("hex");
+    const user=await User.findOne({resetToken:hashedToken,resetTokenExpiry:{$gt:Date.now()}});
+    console.log(user);
+    if(!user){
+        throw new ApiError(404,"User not found");
+    }
+    user.password=password;
+    user.resetToken=undefined;
+    user.resetTokenExpiry=undefined;
+    await user.save({validateBeforeSave:false});
+    return res.status(200).json(new ApiResponse(200,{user},"Password reset successfully"));
+    
+})
 
 export {
   registerUser,
