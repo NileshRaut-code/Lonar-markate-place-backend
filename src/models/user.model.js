@@ -55,6 +55,12 @@ const userSchema = new Schema(
     refreshToken: {
       type: String,
     },
+    resetToken: {
+      type: String,
+    },  
+    resetTokenExpiry: {
+      type: Date,
+    },
   },
   {
     timestamps: true,
@@ -96,6 +102,16 @@ userSchema.methods.generateRefreshToken = function () {
       expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
     }
   );
+};
+
+userSchema.methods.generateResetToken = function () {
+  const token=crypto.randomBytes(32).toString("hex");
+  const hashedtoken=crypto.createhash("sha256").date(token).digest("hex");
+  const resetTokenExpiry=Date.now()+5 * 60 * 1000;
+  this.resetToken=hashedtoken;
+  this.resetTokenExpiry=resetTokenExpiry;
+  return token;
+
 };
 
 export const User = mongoose.model("User", userSchema);

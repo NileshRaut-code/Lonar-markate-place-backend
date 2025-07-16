@@ -11,6 +11,8 @@ import {
   updateAccountDetails,
   allProducts,
   allProductsLimitpage,
+  forgotPassword,
+  resetPassword,
 } from "../controllers/user.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import multer from "multer";
@@ -28,7 +30,8 @@ router.route("/refresh-token").post(refreshAccessToken);
 router.route("/change-password").post(verifyJWT, changeCurrentPassword);
 router.route("/current-user").get(verifyJWT, getCurrentUser);
 router.route("/update-account").patch(verifyJWT, updateAccountDetails);
-
+router.route("/forgot-password").post(forgotPassword);
+router.route("/reset-password").post(resetPassword);
 router
   .route("/update-avatar")
   .patch(verifyJWT, upload.any("image", 1), updateUserAvatar);
