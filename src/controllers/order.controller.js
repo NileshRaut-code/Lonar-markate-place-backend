@@ -6,10 +6,7 @@ import Razorpay from "razorpay";
 import crypto from "crypto";
 import { ObjectId } from "mongodb";
 
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+
 
 const allOrder = asyncHandler(async (req, res) => {
   const allorderData = await Order.find({}).populate("product_id");
@@ -45,6 +42,7 @@ const createOrder = asyncHandler(async (req, res) => {
 
 // For User: Step 1 of Online Payment - Create a Razorpay Order ID
 const createRazorpayOrder = asyncHandler(async (req, res) => {
+    
     const { products } = req.body;
     let totalAmount = 0;
     for (const product of products) {
@@ -62,6 +60,10 @@ const createRazorpayOrder = asyncHandler(async (req, res) => {
     };
 
     try {
+        const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
         const razorpayOrder = await razorpay.orders.create(options);
         if (!razorpayOrder) {
             throw new ApiError(500, "Failed to create Razorpay order");
