@@ -9,6 +9,7 @@ import { Product } from "../models/product.model.js";
 import { uploadImageToCloudinary } from "../utils/cloudinary.js";
 import sendEmail from "../utils/Email.js"
 import crypto from "crypto";
+import { OAuth2Client } from "google-auth-library";
 const generateAccessAndRefereshTokens = async (userId) => {
   try {
     const user = await User.findById(userId);
@@ -439,9 +440,155 @@ const resetPassword = asyncHandler(async (req, res) => {
     await user.save({validateBeforeSave:false});
     return res.status(200).json(new ApiResponse(200,{user},"Password reset successfully"));
     
+
 })
 
-export {
+const GoogleloginUser =asyncHandler(async(req,res)=>{
+  const {token}=req.body;
+  if (!token){throw new ApiError(400, "The  Token are Not pResent");}
+
+  const client =new OAuth2Client(process.env.CLIENT_ID);
+
+    const ticket = await client.verifyIdToken({
+    idToken: token,
+    audience: process.env.CLIENT_ID,
+  });
+
+  const payload = ticket.getPayload();
+  const {email}=payload
+  if (!email) {
+    throw new ApiError(400, "email is required");
+  }
+  const user=await User.findOne({
+    email
+  })
+
+    
+
+  if (!user) {
+    throw new ApiError(404, "User does not exist");
+  }
+   const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(
+    user._id
+  );
+
+  const loggedInUser = await User.findById(user._id).select(
+    "-password -refreshToken"
+  );
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  };
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(
+        200,
+        {
+          user: loggedInUser,
+          // accessToken,
+          // refreshToken,
+        },
+        "User logged In Successfully"
+      )
+    );
+
+  
+})
+
+const GoogleSignup = asyncHandler(async (req, res) => {
+  const { token, password, phoneno } = req.body;
+
+  if (!token) {
+    throw new ApiError(400, "Google token is required");
+  }
+  if (!password || password.trim() === "") {
+    throw new ApiError(400, "Password is required for Google signup");
+  }
+
+  const client = new OAuth2Client(process.env.CLIENT_ID);
+  const ticket = await client.verifyIdToken({
+    idToken: token,
+    audience: process.env.CLIENT_ID,
+  });
+
+  const { name, sub, picture, email } = ticket.getPayload();
+
+  const username =
+    (name ? name.replace(/\s+/g, "").toLowerCase() : "user") +
+    Math.floor(1000 + Math.random() * 9000).toString();
+
+  if (!name || !email || !sub) {
+    throw new ApiError(400, "Google account data is incomplete");
+  }
+
+  const existedUser = await User.findOne({
+    $or: [{ email }, { username }, { sub }],
+  });
+
+  if (existedUser) {
+    throw new ApiError(409, "User with this Google account already exists");
+  }
+
+  const user = await User.create({
+    fullName: name,
+    email,
+    username: username.toLowerCase(),
+    password,             
+    phoneno: phoneno || null,
+    sub,                 
+    avatar: picture,
+    authProvider: "google"
+  });
+
+  const createdUser = await User.findById(user._id).select(
+    "-password -refreshToken"
+  );
+
+  if (!createdUser) {
+    throw new ApiError(500, "Something went wrong while registering with Google");
+  }
+
+  // generate tokens
+  const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(
+    createdUser._id
+  );
+
+  const loggedInUser = await User.findById(createdUser._id).select(
+    "-password -refreshToken"
+  );
+
+  const options = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "none",
+  };
+
+  return res
+    .status(201)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(
+        201,
+        {
+          user: loggedInUser,
+          // accessToken,
+          // refreshToken,
+        },
+        "User signed up successfully with Google"
+      )
+    );
+});
+
+
+
+export {GoogleSignup,GoogleloginUser,
   registerUser,
   loginUser,
   logoutUser,
