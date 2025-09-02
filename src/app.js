@@ -26,6 +26,7 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/admin", adminRouter);
 app.use("/api/v1/seller", sellerRouter);
 app.use("/api/v1/orders", orderRouter);
+
 // http://localhost:8000/api/v1/users/register
 
 export { app };
