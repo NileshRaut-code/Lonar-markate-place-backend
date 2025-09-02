@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  CreateAd,
   EditOrder,
   getComment,
   getShopProfile,
@@ -55,5 +56,7 @@ router.route("/product/comment/:id").get(getComment);
 
 router.route("/order/confirm").put(verifyJWT, verifySeller, EditOrder);
 router.route("/allorder").get(verifyJWT, verifySeller, allOrder);
+
+router.route("/Create_Ad").get(verifyJWT,verifySeller,CreateAd)
 
 export default router;

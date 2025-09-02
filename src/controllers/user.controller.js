@@ -10,6 +10,7 @@ import { uploadImageToCloudinary } from "../utils/cloudinary.js";
 import sendEmail from "../utils/Email.js"
 import crypto from "crypto";
 import { OAuth2Client } from "google-auth-library";
+import { Ad } from "../models/ads.model.js";
 const generateAccessAndRefereshTokens = async (userId) => {
   try {
     const user = await User.findById(userId);
@@ -356,9 +357,17 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 });
 
 const allProducts = asyncHandler(async (req, res) => {
-  const products = await Product.find({}).populate({
-    path: "createdBy",
-    select: "fullName username",
+      const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10; 
+    const sortField = req.query.sort || "createdAt";
+    const sortOrder = req.query.order === "asc" ? 1 : -1;
+
+  const products = await Product.paginate({},{
+    page,
+    limit,
+    sort: { sortField: sortOrder },
+    populate: { path: "createdBy", select: "fullName username" },
+
   });
 
   //console.log(products);
@@ -587,8 +596,14 @@ const GoogleSignup = asyncHandler(async (req, res) => {
 });
 
 
+const Loadallads= asyncHandler(async(req,res)=>{
+   const data=await Ad.find({});
+   res.json(new ApiResponse(200,data,"All Ads are getting"))
+})
 
-export {GoogleSignup,GoogleloginUser,
+
+
+export {GoogleSignup,GoogleloginUser,Loadallads,
   registerUser,
   loginUser,
   logoutUser,

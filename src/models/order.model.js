@@ -52,8 +52,20 @@ const orderSchema = new Schema(
   }
 );
 orderSchema.pre("save", function (next) {
-  // Calculate the total cost based on price and quantity
   this.total_cost = this.price * this.quantity;
   next();
 });
+
+
+orderSchema.plugin(function paginatePlugin(schema) {
+  schema.statics.paginate = async function (query = {}, { page = 1, limit = 10 }) {
+    const skip = (page - 1) * limit;
+    const [data, total] = await Promise.all([
+      this.find(query).skip(skip).limit(limit),
+      this.countDocuments(query),
+    ]);
+    return { data, total, page, pages: Math.ceil(total / limit) };
+  };
+});
+
 export const Order = mongoose.model("Order", orderSchema);

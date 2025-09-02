@@ -13,8 +13,10 @@ import {
   allProductsLimitpage,
   forgotPassword,
   resetPassword,
-  GoogleSignup,GoogleloginUser
+  GoogleSignup,GoogleloginUser,
+  Loadallads
 } from "../controllers/user.controller.js";
+
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import multer from "multer";
 
@@ -43,7 +45,7 @@ router.route("/allproduct").get(allProducts);
 router.route("/allproduct/page/:id").get(allProductsLimitpage);
 router.route("/google-login").post(GoogleloginUser);
 router.route("/google-signup").post(GoogleSignup);
-
+router.route("/Load_Ads").get(Loadallads)
 
 export default router;
 

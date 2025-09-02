@@ -42,23 +42,19 @@ const createOrder = asyncHandler(async (req, res) => {
 
 // For User: Step 1 of Online Payment - Create a Razorpay Order ID
 const createRazorpayOrder = asyncHandler(async (req, res) => {
-    
     const { products } = req.body;
     let totalAmount = 0;
     for (const product of products) {
         totalAmount += product.price * product.quantity;
     }
-
     if (totalAmount === 0) {
         throw new ApiError(400, "Cannot create order with zero amount");
     }
-
     const options = {
         amount: totalAmount * 100, // amount in the smallest currency unit
         currency: "INR",
         receipt: `receipt_order_${new Date().getTime()}`
     };
-
     try {
         const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
@@ -85,18 +81,14 @@ const verifyOnlinePayment = asyncHandler(async (req, res) => {
         pincode
     } = req.body;
     const ordercreatedBy = req.user._id;
-
     const body = razorpay_order_id + "|" + razorpay_payment_id;
-
     const expectedSignature = crypto
         .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
         .update(body.toString())
         .digest("hex");
-
     if (expectedSignature !== razorpay_signature) {
         throw new ApiError(400, "Invalid payment signature. Payment failed.");
     }
-
     // Signature is valid, now create the order(s) in the database
     const createdOrders = [];
     for (const product of products) {
@@ -115,7 +107,6 @@ const verifyOnlinePayment = asyncHandler(async (req, res) => {
         });
         createdOrders.push(createdOrder);
     }
-
     res.json(new ApiResponse(200, { verified: true, orders: createdOrders }, "Payment verified and order created successfully"));
 });
 
@@ -123,10 +114,12 @@ const viewallOrder = asyncHandler(async (req, res) => {
   const currentuserid = req.user._id;
   const orderdata = await Order.find({ ordercreatedBy: new ObjectId(currentuserid) })
     .populate({ path: "product_id", select: "image title" });
-    
   if (!orderdata || orderdata.length === 0) {
     return res.json(new ApiResponse(200, [], "No orders found for this user."));
   }
+//   const addlayer=await user.findOne({
+    
+//   })
   res.json(new ApiResponse(200, orderdata, "Successfully fetched all orders for user"));
 });
 

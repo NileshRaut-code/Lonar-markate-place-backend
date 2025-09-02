@@ -11,6 +11,7 @@ import {
 } from "../utils/cloudinary.js";
 import { v2 as cloudinary } from "cloudinary";
 import { Order } from "../models/order.model.js";
+import {Ad} from "../models/ads.model.js";
 const allProducts = asyncHandler(async (req, res) => {
   const product_data = await Product.find({}).populate({
     path: "createdBy",
@@ -342,8 +343,23 @@ const EditOrder = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, updateddata, "order succesfull updated"));
 });
 
+const CreateAd=asyncHandler(async(req,res)=>{
+  const {title,ad_type,url,ExpireOn,product_Url}=req.body;
+  //payment id temp after change razor also added here 
+let PaymentId="RZhsuwehw"
+
+const createdBy=req.user._id;
+
+const data=await Ad.create({
+  title,ad_type,url,ExpireOn,PaymentId,createdBy,product_Url
+})
+
+res.json(new ApiResponse(200,data,"Add Created Succesfully"))
+
+})
+
 export {
-  createProduct,
+  createProduct,CreateAd,
   getShopProfile,
   updateProduct,
   oneProduct,
