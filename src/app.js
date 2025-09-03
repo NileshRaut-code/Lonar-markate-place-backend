@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
+import { rateLimit } from 'express-rate-limit'
+import helmet from "helmet"
 const app = express();
 
 app.use(
@@ -10,6 +12,13 @@ app.use(
     credentials: true,
   })
 );
+
+
+app.use(helmet())
+app.use(rateLimit({
+  windowMs:1 * 60 * 1000,
+  limit:100
+}))
 
 app.get("/",(req,res)=>{res.send("hellow")})
 app.use(express.json({ limit: "16kb" }));
