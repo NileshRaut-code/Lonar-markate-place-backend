@@ -446,8 +446,9 @@ const resetPassword = asyncHandler(async (req, res) => {
     user.password=password;
     user.resetToken=undefined;
     user.resetTokenExpiry=undefined;
-    await user.save({validateBeforeSave:false});
-    return res.status(200).json(new ApiResponse(200,{user},"Password reset successfully"));
+    await user.save();
+    const updatedUser = await User.findById(user._id)
+    return res.status(200).json(new ApiResponse(200,{user: updatedUser},"Password reset successfully"));
     
 
 })
