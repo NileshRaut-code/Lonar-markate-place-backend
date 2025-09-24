@@ -113,7 +113,7 @@ const verifyOnlinePayment = asyncHandler(async (req, res) => {
 const viewallOrder = asyncHandler(async (req, res) => {
   const currentuserid = req.user._id;
   const orderdata = await Order.find({ ordercreatedBy: new ObjectId(currentuserid) })
-    .populate({ path: "product_id", select: "image title" });
+    .populate({ path: "product_id", select: "image title" }).sort({ createdAt: -1 });;
   if (!orderdata || orderdata.length === 0) {
     return res.json(new ApiResponse(200, [], "No orders found for this user."));
   }
