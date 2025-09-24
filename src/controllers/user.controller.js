@@ -134,7 +134,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
   const user = await User.findOne({
     $or: [{ username }, { email }],
-  });
+  }).select('+password');
 
   if (!user) {
     throw new ApiError(404, "User does not exist");
@@ -255,7 +255,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 const changeCurrentPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
-  const user = await User.findById(req.user?._id);
+  const user = await User.findById(req.user?._id).select('+password');
   const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
 
   if (!isPasswordCorrect) {
